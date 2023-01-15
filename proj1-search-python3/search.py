@@ -87,6 +87,40 @@ def depthFirstSearch(problem):
     print("Start's successors:", problem.getSuccessors(problem.getStartState()))
     """
     "*** YOUR CODE HERE ***"
+    # Initialize fringe
+    fringe = util.Stack()
+    # Add start state and path to fringe
+    fringe.push((problem.getStartState(), []))
+
+    if problem.isGoalState(problem.getStartState()):
+        print("Start state is the goal state.")
+        return []
+
+    while not fringe.isEmpty():
+        curr, path = fringe.pop() # curr is a tuple with (x,y) location of agent
+                                  # path is a list: path from start to curr
+        if problem.isGoalState(curr):
+            print(path)
+            return path
+        else:
+            successors = problem.getSuccessors(curr)
+            for item in successors:
+                # item[0] is (x,y) location of successor
+                # item[1] is action to get to successor, e.g. 'South'
+                updatedPath = path.copy() # Create copy of original path, avoid changing path variable
+                updatedPath.append(item[1]) # Add step taken to the list of path
+                fringe.push((item[0], updatedPath))
+        # a = fringe.pop()
+        # b = fringe.pop()
+        # print(a)
+        # print(b)
+        # print("--------------")
+        # break
+
+    print("=============")
+    print("Start:", problem.getStartState())
+    print("Is the start a goal?", problem.isGoalState(problem.getStartState()))
+    print("Start's successors:", problem.getSuccessors(problem.getStartState()))
     util.raiseNotDefined()
 
 def breadthFirstSearch(problem):
