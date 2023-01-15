@@ -91,6 +91,7 @@ def depthFirstSearch(problem):
     fringe = util.Stack()
     # Add start state and path to fringe
     fringe.push((problem.getStartState(), []))
+    checked = []  # List to store checked nodes
 
     if problem.isGoalState(problem.getStartState()):
         print("Start state is the goal state.")
@@ -99,10 +100,12 @@ def depthFirstSearch(problem):
     while not fringe.isEmpty():
         curr, path = fringe.pop() # curr is a tuple with (x,y) location of agent
                                   # path is a list: path from start to curr
-        if problem.isGoalState(curr):
-            print(path)
-            return path
-        else:
+        if curr not in checked:
+            checked.append(curr)
+            # TERMINATE: Reached goal state, return path to get to here
+            if problem.isGoalState(curr):
+                return path
+            # Have not reached goal state yet, continue searching
             successors = problem.getSuccessors(curr)
             for item in successors:
                 # item[0] is (x,y) location of successor
@@ -110,18 +113,8 @@ def depthFirstSearch(problem):
                 updatedPath = path.copy() # Create copy of original path, avoid changing path variable
                 updatedPath.append(item[1]) # Add step taken to the list of path
                 fringe.push((item[0], updatedPath))
-        # a = fringe.pop()
-        # b = fringe.pop()
-        # print(a)
-        # print(b)
-        # print("--------------")
-        # break
 
-    print("=============")
-    print("Start:", problem.getStartState())
-    print("Is the start a goal?", problem.isGoalState(problem.getStartState()))
-    print("Start's successors:", problem.getSuccessors(problem.getStartState()))
-    util.raiseNotDefined()
+    return []
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
