@@ -147,8 +147,34 @@ def breadthFirstSearch(problem):
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    start_state = problem.getStartState()
+    if problem.isGoalState(start_state):
+        return []
+
+    # In UCS, fringe is a priority queue
+    fringe = util.PriorityQueue()
+    fringe.push((start_state, [], 0), 0)
+
+    checked = []
+
+    while not fringe.isEmpty():
+        curr, path, cost = fringe.pop()
+
+        if curr not in checked:
+            checked.append(curr)
+            if problem.isGoalState(curr):
+                return path
+            successors = problem.getSuccessors(curr)
+            for item in successors:
+                # item[0] is (x,y) location of successor
+                # item[1] is action to get to successor, e.g. 'South'
+                # item[2] is cost
+                updatedPath = path.copy()  # Create copy of original path, avoid changing path variable
+                updatedPath.append(item[1])  # Add step taken to the list of path
+                p = problem.getCostOfActions(updatedPath)  # Returns the cost of a particular sequence of actions.
+                fringe.push((item[0], updatedPath, p), p)  # push(self, item, priority)
+
+    return []
 
 def nullHeuristic(state, problem=None):
     """
