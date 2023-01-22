@@ -185,8 +185,44 @@ def nullHeuristic(state, problem=None):
 
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+
+    start_state = problem.getStartState()
+    if problem.isGoalState(start_state):
+        return []
+
+    # In A* Search, we both look at path cost and goal proximity
+    # For each move, look at path cost in priority queue
+    # Goal proximity is estimated with heuristic
+    fringe = util.PriorityQueue()
+    fringe.push((start_state, [], 0), 0)
+
+    checked = []
+
+    while not fringe.isEmpty():
+        curr, path, past_cost = fringe.pop()
+
+        if curr not in checked:
+            checked.append(curr)
+
+            if problem.isGoalState(curr):
+                return path
+
+            # Look at next steps
+            successors = problem.getSuccessors(curr)
+            for item in successors:
+                # item[0] is (x,y) location of successor
+                # item[1] is action to get to successor, e.g. 'South'
+                # item[2] is cost
+                updatedPath = path.copy()  # Create copy of original path, avoid changing path variable
+                updatedPath.append(item[1])  # Add step taken to the list of path
+                # f(n) = g(n) + h(n)
+                # getCostOfActions Returns the cost of a particular sequence of actions, g(n)
+                # heuristic returns the forward cost/goal proximity, h(n)
+                p = problem.getCostOfActions(updatedPath) + heuristic(item[0], problem)
+                fringe.push((item[0], updatedPath, p), p)  # push(self, item, priority)
+
+    return []
+    #util.raiseNotDefined()
 
 
 # Abbreviations
