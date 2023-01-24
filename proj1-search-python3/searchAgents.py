@@ -33,6 +33,7 @@ description for details.
 
 Good luck and happy searching!
 """
+import math
 
 from game import Directions
 from game import Agent
@@ -294,15 +295,16 @@ class CornersProblem(search.SearchProblem):
         Returns the start state (in your state space, not the full Pacman state
         space)
         """
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        return (self.startingPosition, [])
 
     def isGoalState(self, state):
         """
         Returns whether this search state is a goal state of the problem.
         """
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        if state[0] in self.corners:
+            if state[0] not in state[1]: state[1].append(state[0])
+            if len(state[1]) == 4: return True
+        return False
 
     def getSuccessors(self, state):
         """
@@ -314,6 +316,8 @@ class CornersProblem(search.SearchProblem):
             state, 'action' is the action required to get there, and 'stepCost'
             is the incremental cost of expanding to that successor
         """
+        # print(state[0], state[1])  # (4,5), []
+        x, y = state[0]
 
         successors = []
         for action in [Directions.NORTH, Directions.SOUTH, Directions.EAST, Directions.WEST]:
@@ -323,8 +327,21 @@ class CornersProblem(search.SearchProblem):
             #   dx, dy = Actions.directionToVector(action)
             #   nextx, nexty = int(x + dx), int(y + dy)
             #   hitsWall = self.walls[nextx][nexty]
+            dx, dy = Actions.directionToVector(action)
+            nextx, nexty = int(x + dx), int(y + dy)
+            hitsWall = self.walls[nextx][nexty]  # Returns True or False value
 
-            "*** YOUR CODE HERE ***"
+            if not hitsWall:
+                next_cell = (nextx, nexty)
+                next_corners = state[1].copy()
+
+                # If next cell to move to is a corner
+                if next_cell in self.corners:
+                    if next_cell not in next_corners:
+                        next_corners.append(next_cell)
+
+                next_succ = ((next_cell, next_corners), action, 1)
+                successors.append(next_succ)
 
         self._expanded += 1 # DO NOT CHANGE
         return successors
@@ -359,8 +376,25 @@ def cornersHeuristic(state, problem):
     corners = problem.corners # These are the corner coordinates
     walls = problem.walls # These are the walls of the maze, as a Grid (game.py)
 
-    "*** YOUR CODE HERE ***"
-    return 0 # Default to trivial solution
+    corner_destinations = []
+    for c in corners:
+        if c not in state[1]:
+            corner_destinations.append(c)
+
+    curr = state[0]
+    total_cost = 0
+    next_corner = None
+    while len(corner_destinations) > 0:
+        cost = float('inf')
+        for c in corner_destinations:
+            if util.manhattanDistance(curr, c) <= cost:
+                next_corner = c
+                cost = util.manhattanDistance(curr, c)
+        corner_destinations.remove(next_corner)
+        curr = next_corner
+        total_cost += cost
+
+    return total_cost # Default to trivial solution
 
 class AStarCornersAgent(SearchAgent):
     "A SearchAgent for FoodSearchProblem using A* and your foodHeuristic"
