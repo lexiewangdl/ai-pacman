@@ -488,7 +488,45 @@ def foodHeuristic(state, problem):
     """
     position, foodGrid = state
     "*** YOUR CODE HERE ***"
-    return 0
+
+    remaining_dots = foodGrid.asList()
+
+
+    # total = 0
+    # curr = position
+    #
+    # dots_dist = []
+    # for item in remaining_dots:
+    #     # Euclidean distance
+    #     # d = math.sqrt(pow(abs(curr[0]-item[0]), 2) + pow(abs(curr[1]-item[1]), 2))
+    #     # Manhattan distance
+    #     d = util.manhattanDistance(curr, item)
+    #     dots_dist.append((d, item))
+    # dots_dist.sort(key=lambda x:x[1])
+    #
+    # while len(remaining_dots) > 0:
+    #     nearest_food = remaining_dots[0][1]
+    #     h = remaining_dots[0][0]
+    #     total += h
+    #     remaining_dots.remove(remaining_dots[0])
+    #     curr = nearest_food
+
+    # MANHATTAN?
+    # while len(remaining_dots) > 0:
+    #     h = float('inf')
+    #     next_dot = None
+    #     for item in remaining_dots:
+    #         if abs(curr[0] - item[0]) <= h:
+    #             h = abs(curr[0] - item[0])
+    #         # if math.sqrt(pow(abs(curr[0]-item[0]), 2) + pow(abs(curr[1]-item[1]), 2)) <= h:
+    #         #     h = math.sqrt(pow(abs(curr[0]-item[0]), 2) + pow(abs(curr[1]-item[1]), 2))
+    #             next_dot = item
+    #     remaining_dots.remove(next_dot)
+    #     curr = next_dot
+    #     total += h
+
+    return len(remaining_dots)
+    # return total
 
 class ClosestDotSearchAgent(SearchAgent):
     "Search for all food using a sequence of searches"
@@ -519,7 +557,7 @@ class ClosestDotSearchAgent(SearchAgent):
         problem = AnyFoodSearchProblem(gameState)
 
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        return search.bfs(problem)
 
 class AnyFoodSearchProblem(PositionSearchProblem):
     """
@@ -552,7 +590,15 @@ class AnyFoodSearchProblem(PositionSearchProblem):
         The state is Pacman's position. Fill this in with a goal test that will
         complete the problem definition.
         """
-        x,y = state
+        remaining_food = self.food.asList()
+        dist = float('inf')
+        goal = None
+        for food in remaining_food:
+            if util.manhattanDistance(state, food) <= dist:
+                dist = util.manhattanDistance(state, food)
+                goal = food
+        if state == goal: return True
+        else: return False
 
         "*** YOUR CODE HERE ***"
         util.raiseNotDefined()
