@@ -489,8 +489,16 @@ def foodHeuristic(state, problem):
     position, foodGrid = state
     "*** YOUR CODE HERE ***"
 
-    remaining_dots = foodGrid.asList()
+    food_list = foodGrid.asList()
 
+    if not food_list:
+        return 0
+
+    distance_to_food = []
+    for item in food_list:
+        distance_to_food.append(util.manhattanDistance(position, item))
+
+    return min(distance_to_food)
 
     # total = 0
     # curr = position
@@ -525,7 +533,7 @@ def foodHeuristic(state, problem):
     #     curr = next_dot
     #     total += h
 
-    return len(remaining_dots)
+    # return len(remaining_dots)
     # return total
 
 class ClosestDotSearchAgent(SearchAgent):
