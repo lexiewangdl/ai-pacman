@@ -184,14 +184,59 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
     """
     Your minimax agent with alpha-beta pruning (question 3)
     """
-
     def getAction(self, gameState):
         """
-        Returns the minimax action using self.depth and self.evaluationFunction
+          Returns the minimax action using self.depth and self.evaluationFunction
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        return self.maxnode(gameState, 0 , 0, -math.inf, math.inf)[0]
 
+    def alpha_beta(self, gameState, depth, agent_type, alpha, beta):
+        if depth >= self.depth * gameState.getNumAgents() or gameState.isWin() or gameState.isLose():
+            return self.evaluationFunction(gameState)
+
+        if agent_type == 0:  # If agent is maximizer
+            return self.maxnode(gameState, depth, agent_type, alpha, beta)[1]
+
+        else:  # If agent is minimizer
+            return self.minnode(gameState, depth, agent_type, alpha, beta)[1]
+
+    def maxnode(self, gameState, depth, agent_type, alpha, beta):
+        best_action = None
+        best_val = -math.inf
+
+        for action in gameState.getLegalActions(agent_type):
+            next_state = gameState.generateSuccessor(agent_type, action)
+            next_agent = (depth + 1) % gameState.getNumAgents()
+            candidate = self.alpha_beta(next_state, depth+1, next_agent, alpha, beta)
+
+            if candidate >= best_val:
+                best_val = candidate
+                best_action = action
+
+            # Prune
+            if best_val > beta: return (best_action, best_val)
+            else: alpha = max(alpha, best_val)
+
+        return (best_action, best_val)
+
+    def minnode(self, gameState, depth, agent_type, alpha, beta):
+        best_action = None
+        best_val = math.inf
+        for action in gameState.getLegalActions(agent_type):
+            next_state = gameState.generateSuccessor(agent_type, action)
+            next_agent = (depth + 1) % gameState.getNumAgents()
+            candidate = self.alpha_beta(next_state, depth+1, next_agent, alpha, beta)
+
+            if candidate <= best_val:
+                best_val = candidate
+                best_action = action
+
+            # Pruning
+            if best_val < alpha: return (best_action, best_val)
+            else: beta = min(beta, best_val)
+
+        return (best_action, best_val)
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
     """
