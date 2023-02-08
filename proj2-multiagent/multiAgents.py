@@ -242,7 +242,14 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
     """
       Your expectimax agent (question 4)
     """
-
+    def getAction(self, gameState):
+        """
+          Returns the expectimax action using self.depth and self.evaluationFunction
+          All ghosts should be modeled as choosing uniformly at random from their
+          legal moves.
+          The expectimax function returns a tuple of (actions,
+        """
+        "*** YOUR CODE HERE ***"
     def getAction(self, gameState):
         """
         Returns the expectimax action using self.depth and self.evaluationFunction
@@ -251,7 +258,42 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
         legal moves.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        return self.expectimax(gameState, self.depth * gameState.getNumAgents(), 0, 'haha')[0]
+
+    def expectimax(self, gameState, depth, agent_type, action):
+        if depth == 0 or gameState.isWin() or gameState.isLose():
+            return (action, self.evaluationFunction(gameState))
+        if agent_type == 0:  # Maximizer
+            return self.maxnode(gameState, depth, agent_type, action)
+        else:  # Expectation node
+            return self.expnode(gameState, depth, agent_type, action)
+
+    def expnode(self, gameState, depth, agent_type, action):
+        candidates = gameState.getLegalActions(agent_type)
+        e_val = 0
+        for a in candidates:
+            next_agent = (agent_type + 1) % gameState.getNumAgents()
+            next_state = gameState.generateSuccessor(agent_type, a)
+            best_move = self.expectimax(next_state, depth-1, next_agent, action)
+            e_val += best_move[1] * (1/len(candidates))
+
+        return (action, e_val)
+
+    def maxnode(self, gameState, depth, agent_type, action):
+        best_move = ("None", -math.inf)
+        for a in gameState.getLegalActions(agent_type):
+            next_agent = (agent_type + 1) % gameState.getNumAgents()
+            next_state = gameState.generateSuccessor(agent_type, a)
+            if depth != self.depth * gameState.getNumAgents():
+                candidate = action
+            else:
+                candidate = a
+            cand_val = self.expectimax(next_state, depth-1, next_agent, candidate)
+            if cand_val[1] >= best_move[1]:
+                best_move = cand_val
+        return best_move
+
+
 
 def betterEvaluationFunction(currentGameState):
     """
