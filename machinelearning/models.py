@@ -146,6 +146,17 @@ class DigitClassificationModel(object):
     def __init__(self):
         # Initialize your model parameters here
         "*** YOUR CODE HERE ***"
+        self.bs = 50
+        self.lr = .09
+        self.w1 = nn.Parameter(784, 350)
+        self.b1 = nn.Parameter(1, 350)
+        self.w2 = nn.Parameter(350, 150)
+        self.b2 = nn.Parameter(1, 150)
+        self.w3 = nn.Parameter(150, 50)
+        self.b3 = nn.Parameter(1, 50)
+        self.w4 = nn.Parameter(50, 10)
+        self.b4 = nn.Parameter(1, 10)
+        self.parameters = [self.w1, self.b1, self.w2, self.b2, self.w3, self.b3, self.w4, self.b4]
 
     def run(self, x):
         """
@@ -162,6 +173,17 @@ class DigitClassificationModel(object):
                 (also called logits)
         """
         "*** YOUR CODE HERE ***"
+        l1_f = nn.Linear(x, self.w1)  # nn.Linear(features, weights)
+        l1 = nn.ReLU(nn.AddBias(l1_f, self.b1))  # nn.AddBias(features, bias)
+
+        l2_f = nn.Linear(l1, self.w2)
+        l2 = nn.ReLU(nn.AddBias(l2_f, self.b2))
+
+        l3_f = nn.Linear(l2, self.w3)
+        l3 = nn.AddBias(l3_f, self.b3)
+
+        l_o = nn.AddBias(nn.Linear(l3, self.w4), self.b4)
+        return l_o
 
     def get_loss(self, x, y):
         """
@@ -177,12 +199,25 @@ class DigitClassificationModel(object):
         Returns: a loss node
         """
         "*** YOUR CODE HERE ***"
+        y_o = self.run(x)
+        res = nn.SoftmaxLoss(y_o, y)
+        return res
 
     def train(self, dataset):
         """
         Trains the model.
         """
         "*** YOUR CODE HERE ***"
+        training_loss = float('inf')
+        va = 0
+        while va < .98:
+            for x, y in dataset.iterate_once(self.bs):
+                training_loss = self.get_loss(x, y)
+                grads = nn.gradients(training_loss, self.parameters)
+                training_loss = nn.as_scalar(training_loss)
+                for i in range(len(self.parameters)):
+                    self.parameters[i].update(grads[i], -self.lr)
+            va = dataset.get_validation_accuracy()
 
 class LanguageIDModel(object):
     """
