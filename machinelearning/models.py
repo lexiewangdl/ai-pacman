@@ -66,7 +66,19 @@ class RegressionModel(object):
     """
     def __init__(self):
         # Initialize your model parameters here
+        # Batch size: between 1 and the size of the dataset.
+        self.bs = 50
+        # Learning rate: between 0.001 and 1.0.
+        # Number of hidden layers: between 1 and 3.
         "*** YOUR CODE HERE ***"
+        self.lr = .03
+        self.w1 = nn.Parameter(1, 50)  # Hidden layer sizes: between 10 and 400.
+        self.b1 = nn.Parameter(1, 50)
+        self.w2 = nn.Parameter(50, 25)
+        self.b2 = nn.Parameter(1, 25)
+        self.w3 = nn.Parameter(25, 1)
+        self.b3 = nn.Parameter(1, 1)
+        self.parameters = [self.w1, self.b1, self.w2, self.b2, self.w3, self.b3]
 
     def run(self, x):
         """
@@ -78,6 +90,15 @@ class RegressionModel(object):
             A node with shape (batch_size x 1) containing predicted y-values
         """
         "*** YOUR CODE HERE ***"
+        l1_f = nn.Linear(x, self.w1)  # nn.Linear(features, weights)
+        l1 = nn.ReLU(nn.AddBias(l1_f, self.b1))  # nn.AddBias(features, bias)
+
+        l2_f = nn.Linear(l1, self.w2)
+        l2 = nn.ReLU(nn.AddBias(l2_f, self.b2))
+
+        l3_f = nn.Linear(l2, self.w3)
+        l3 = nn.AddBias(l3_f, self.b3)
+        return l3
 
     def get_loss(self, x, y):
         """
@@ -90,12 +111,24 @@ class RegressionModel(object):
         Returns: a loss node
         """
         "*** YOUR CODE HERE ***"
+        y_o = self.run(x)
+        res = nn.SquareLoss(y_o, y)
+        return res
 
     def train(self, dataset):
         """
         Trains the model.
         """
         "*** YOUR CODE HERE ***"
+        loss = float('inf')
+        while loss >= .015:
+            for x, y in dataset.iterate_once(self.bs):
+                loss = self.get_loss(x, y)
+                print(nn.as_scalar(loss))
+                grads = nn.gradients(loss, self.params)
+                loss = nn.as_scalar(loss)
+                for i in range(len(self.params)):
+                    self.params[i].update(grads[i], -self.lr)
 
 class DigitClassificationModel(object):
     """
