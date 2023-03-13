@@ -120,15 +120,14 @@ class RegressionModel(object):
         Trains the model.
         """
         "*** YOUR CODE HERE ***"
-        loss = float('inf')
-        while loss >= .015:
+        training_loss = float('inf')
+        while training_loss >= .019:  # full points if it gets a loss of 0.02 or better
             for x, y in dataset.iterate_once(self.bs):
-                loss = self.get_loss(x, y)
-                print(nn.as_scalar(loss))
-                grads = nn.gradients(loss, self.params)
-                loss = nn.as_scalar(loss)
-                for i in range(len(self.params)):
-                    self.params[i].update(grads[i], -self.lr)
+                training_loss = self.get_loss(x, y)
+                grads = nn.gradients(training_loss, self.parameters)
+                training_loss = nn.as_scalar(training_loss)
+                for i in range(len(self.parameters)):
+                    self.parameters[i].update(grads[i], -self.lr)
 
 class DigitClassificationModel(object):
     """
