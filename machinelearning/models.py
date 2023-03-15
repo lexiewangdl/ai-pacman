@@ -1,3 +1,5 @@
+import math
+
 import nn
 
 class PerceptronModel(object):
@@ -237,6 +239,17 @@ class LanguageIDModel(object):
 
         # Initialize your model parameters here
         "*** YOUR CODE HERE ***"
+        self.lr = .08
+        self.initial_w = nn.Parameter(self.num_chars, 200)
+        self.initial_b = nn.Parameter(1, 200)
+        self.x_w = nn.Parameter(self.num_chars, 200)
+        self.h_w = nn.Parameter(200, 200)
+        self.b = nn.Parameter(1, 200)
+        self.output_w = nn.Parameter(200, len(self.languages))
+        self.output_b = nn.Parameter(1, len(self.languages))
+
+        self.params = [self.initial_w, self.initial_b, self.x_w, self.h_w,
+                       self.b, self.output_w, self.output_b]
 
     def run(self, xs):
         """
@@ -268,6 +281,12 @@ class LanguageIDModel(object):
                 (also called logits)
         """
         "*** YOUR CODE HERE ***"
+        f_i = nn.Linear(xs[0], self.initial_w)
+        h_i = nn.ReLU(nn.AddBias(f_i, self.initial_b))
+        for char in xs[1:]:
+            h_i = nn.ReLU(nn.AddBias(nn.Add(nn.Linear(char, self.x_w), nn.Linear(h_i, self.h_w)), self.b))
+        output = nn.AddBias(nn.Linear(h_i, self.output_w), self.output_b)
+        return output
 
     def get_loss(self, xs, y):
         """
@@ -284,9 +303,23 @@ class LanguageIDModel(object):
         Returns: a loss node
         """
         "*** YOUR CODE HERE ***"
+        y_o = self.run(xs)
+        res = nn.SoftmaxLoss(y_o, y)
+        return res
 
     def train(self, dataset):
         """
         Trains the model.
         """
         "*** YOUR CODE HERE ***"
+        batch_size = 100
+        loss = math.inf
+        acc = 0
+        while acc < .85:
+            for x, y in dataset.iterate_once(batch_size):
+                loss = self.get_loss(x, y)
+                gradients = nn.gradients(loss, self.params)
+                loss = nn.as_scalar(loss)
+                for i in range(len(self.params)):
+                    self.params[i].update(gradients[i], -self.lr)
+            acc = dataset.get_validation_accuracy()
